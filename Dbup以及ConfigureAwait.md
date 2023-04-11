@@ -37,11 +37,17 @@ public void Run()
   }
 ```
 
+**加入执行脚本：**
+
+![1](https://img-blog.csdnimg.cn/d7fcc3a85fd746a5991a19feec7e5cdc.png)
+
 **应用程序启动前加载：**
 
 ```dotnet
 new DbRunner("数据源").Run()
 ```
+
+
 
 ### 补足：
 
