@@ -1,16 +1,16 @@
-### Dbup
+# 1.Dbup
 
 DbUp 最初是FunnelWeb中的数据库迁移工具，它是一个开源 ASP.NET MVC 博客引擎。
 
 DbUp 使用构建器来配置数据库部署，然后构建升级引擎并运行数据库迁移。
 
-引入依赖：
+**引入依赖：**
 
 ```dotnet
 Install-Package DbUp
 ```
 
-配置Dbup：
+**配置Dbup：**
 
 ```dotnet
 public void Run()
@@ -37,7 +37,7 @@ public void Run()
   }
 ```
 
-应用程序启动前加载：
+**应用程序启动前加载：**
 
 ```dotnet
 new DbRunner("数据源").Run()
@@ -54,9 +54,9 @@ new DbRunner("数据源").Run()
 - 执行数据库升级`PerformUpgrade()`
 - 日志脚本输出`LogScriptOutput()`
 
-### async/await的ConfigureAwait
+# async/await的ConfigureAwait
 
-##### 1.什么是同步上下文
+## 1.什么是同步上下文
 
 同步上下文（SynchronizationContext）是一个抽象类，用于协调多个线程的执行。同步上下文通常用于将异步方法中的回调函数切换回主线程执行。
 
@@ -92,13 +92,13 @@ SynchronizationContext.Current.Post(_ =>
 
 如果响应状态码表明请求成功，我们可以执行一些成功处理逻辑；否则，我们可以根据错误类型执行相应的错误处理逻辑。
 
-##### 2.ConfigureAwait(false) 做什么？
+## 2.ConfigureAwait(false) 做什么？
 
 在异步编程中，当需要执行长时间运行的操作时，通常会将代码封装在异步任务中。默认情况下，当任务完成时，其结果将被传输回调用线程的同步上下文，以便可以更新 GUI 界面等操作。但是，在某些情况下，如果不需要返回结果到同步上下文，则可以使用ConfigureAwait(false) 来告知编译器不需要在任务完成后切换回同步上下文。这可以提高性能，因为避免了不必要的上下文切换和线程阻塞。
 
 需要注意的是，如果在异步任务中使用ConfigureAwait(false)，则应确保任务不会依赖于同步上下文，并且不会引发线程死锁或竞争条件等问题。
 
-##### 3.为什么要使用 ConfigureAwait(false)？
+## 3.为什么要使用 ConfigureAwait(false)？
 
 使用ConfigureAwait(false)可以提高异步代码的性能并减少线程阻塞，特别是在执行大量异步操作时。如果您正在编写一个需要执行多个异步操作的方法，并且这些操作不依赖于同步上下文，则使用ConfigureAwait(false) 可以避免重复地切换线程上下文，从而减少了 CPU 开销和内存开销。
 
@@ -106,6 +106,6 @@ SynchronizationContext.Current.Post(_ =>
 
 总之，在大部分情况下，如果您确定异步操作不需要返回到调用方的同步上下文中，那么使用ConfigureAwait(false) 是一种很好的选择。
 
-##### 4.为什么要使用ConfigureAwait(true)?
+## 4.为什么要使用ConfigureAwait(true)?
 
 没关就是开了（没有写false就会接着使用同步上下文）
