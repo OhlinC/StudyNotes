@@ -42,7 +42,7 @@ AutoMapper通常与依赖注入一起使用，要将AutoMapper集成到ASP.NET C
 
 接下来，我们就可以使用`.ProjectTo`方法进行对象映射了。假设有一个名为 `UserQuestionDto` 的类，我们希望将 `UserQuestion` 类型的数据映射到 `UserQuestionDto` 类型，可以按照如下方式使用 **.ProjectTo**方法：
 
-![](/Users/chenhaiyang/Library/Application%20Support/marktext/images/2023-04-13-10-43-04-image.png)
+![5](https://img-blog.csdnimg.cn/90f85e950eb74269824766d803e0c6e6.png)
 
 上述代码中，_context.userQuestions 是一个 IQueryable<UserQuestion> 对象，`.ProjectTo<UserQuestionDto>(_mapper.ConfigurationProvider)` 将其映射成 IQueryable<UserQuestionDto>，然后通过`.ToList()`方法将结果转换成 List<UserQuestionDto> 对象。
 
@@ -55,5 +55,11 @@ _mapper.Map<CreatePeopleDto>(result)
 ```
 
 将result的对象属性映射到CreatePeopleDto中。需要注意的是，这行代码的精确行为取决于所使用的AutoMapper实例Mapper的对象规则配置。这个配置决定了源对象和目标对象之间的属性如何映射，包括任何自定义映射或命名约定。
+
+```
+_mapper.Map(updateQuestion, userQuestion);
+```
+
+这段代码的目的是使用 `updateQuestion` 对象提供的新值来更新 `userQuestion` 对象。映射库会确保只复制指定的属性，并确保类型匹配。
 
 
