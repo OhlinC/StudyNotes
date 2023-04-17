@@ -108,8 +108,99 @@ Install-Package Microsoft.AspNetCore.Authentication.JwtBearer
 
 ![6](https://img-blog.csdnimg.cn/22f783b05647415e8f1e27025b867e0a.png)
 
-在这个TokenValidationParameters对象中，我们设置了三个标志分别用于验证JWT的Issuer、Audience和Lifetime属性。因为我们希望在此示例中不验证这些属性，所以将它们全部设置为false。用于JWT签名验证在应用程序中配置。
+在这个TokenValidationParameters对象中，我们设置了三个标志分别用于验证JWT的Issuer(验证颁发者)、Audience(验证受众)和Lifetime(验证令牌的有效期)属性。因为我们希望在此示例中不验证这些属性，所以将它们全部设置为false。用于JWT签名验证在应用程序中配置。
+
+对于JwtBearer 验证方式可以通过AddAuthentication配置多个。
+
+其中还有：
+
+1. `RequireExpirationTime`：是否要求令牌具有过期时间。
+2. `ClockSkew`：允许的时钟偏差量，即可接受的客户端和服务器之间的时间差。
+3. `RequireSignedTokens`：是否要求令牌签名。
+4. `RoleClaimType`：角色声明类型。
+5. `NameClaimType`：名称声明类型。
 
 通过以上步骤的配置，我们就可以在ASP.NET Core应用程序中使用JWT身份验证了。
 
+在项目中配置一个工具类用于封装Key：
 
+![jwt配置类](https://img-blog.csdnimg.cn/8268f1807068453a9f2b5a6ac66038e4.png)
+
+在生成Token方法中获取：
+
+```csharp
+var key = Encoding.UTF8.GetBytes(_jwtSettings.Value);//value不能低于32bit
+```
+
+SecurityTokenDescriptor是用于描述和生成JSON Web Tokens（JWTs）的类。JWTs是一种安全令牌，它包含有关身份验证和授权的信息，并可以在不同的应用程序之间进行共享。
+
+生成SecurityTokenDescriptor类：
+
+```csharp
+var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            }),
+            IssuedAt = DateTime.UtcNow,
+            NotBefore = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.Add(_jwtSettings.ExpiresIn),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature)
+        };
+```
+
+- Subject：用于指定令牌的主题，其中包含ClaimsIdentity对象，该对象代表了已认证的用户或实体的标识信息。
+- IssuedAt：用于指定JWT的发行时间，通常使用UTC时间格式表示。
+- NotBefore：用于指定JWT生效的最早时间，即在此之前JWT都是无效的，通常使用UTC时间格式表示。
+- Expires：用于指定JWT过期的时间，即在此之后JWT都是无效的，通常使用UTC时间格式表示。
+- SigningCredentials：用于指定JWT签名所需的密钥和签名算法，通常使用对称加密算法或非对称加密算法来确保JWT的安全性。
+
+最后创建 `JwtSecurityTokenHandler` 类的实例。
+
+```csharp
+var jwtTokenHandler = new JwtSecurityTokenHandler();
+```
+
+然后，通过调用 `jwtTokenHandler` 对象的 `CreateToken()` 方法，并传入 `tokenDescriptor` 参数，创建一个 JWT 安全令牌。`tokenDescriptor` 包含关于令牌声明的信息，例如发行者、过期时间、受众以及任何用户定义的声明。
+
+```csharp
+var securityToken = jwtTokenHandler.CreateToken(tokenDescriptor);
+```
+
+使用 `jwtTokenHandler` 对象的 `WriteToken()` 方法和 `securityToken` 参数生成 JWT 的序列化字符串表示形式。该字符串可以作为身份验证令牌用于授权用户访问 Web API 或其他受保护的资源。
+
+```csharp
+var token = jwtTokenHandler.WriteToken(securityToken);
+```
+
+**配置`HttpContextAccessor`来管理请求上下文验证是否在应用程序登陆授权：**
+
+1.在应用程序的`Startup.cs`文件中，将`HttpContextAccessor`服务添加到DI容器中
+
+```csharp
+services.AddHttpContextAccessor();
+```
+
+2.创建一个名为`CurrentUser`的新类，并在其中实现`ICurrentUser`接口
+
+```csharp
+public class CurrentUser : ICurrentUser
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CurrentUser(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    //通过访问HttpContext属性，我们可以获取当前HTTP请求的上下文，并从中检索有关已验证用户的信息。
+    public int UserId => int.Parse(_httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+}
+```
+
+一般我们可以通过一个服务扩展类进行扩展以方便后续进一步对服务进行增强或者修改。所以我们在封装类中定义：![123](https://img-blog.csdnimg.cn/fba909c1efd04628868f4432c0c4efbe.png)
+
+现在，就可以在控制器或任何需要访问当前用户ID的位置注入`ICurrentUser`服务，并直接访问其`UserId`属性。
