@@ -130,6 +130,10 @@ install package Shouldly
 
 ![12](https://img-blog.csdnimg.cn/832b42eeea58414fb1b1ef97c152b773.png)
 
+在类中定义重载run以及RunWithUnitOfWork方法，根据不同的请求方式以及参数定制不同的请求接口方法，视情况而定：
+
+![17](https://img-blog.csdnimg.cn/7658d62d301b47a9a52db062294f0043.png)
+
 把各个组件注册到容器当中
 
 ![14](https://img-blog.csdnimg.cn/8c0941611ba744649049d864baaa31b9.png)
