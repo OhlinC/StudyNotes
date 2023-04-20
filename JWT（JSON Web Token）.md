@@ -129,7 +129,7 @@ Install-Package Microsoft.AspNetCore.Authentication.JwtBearer
 在生成Token方法中获取：
 
 ```csharp
-var key = Encoding.UTF8.GetBytes(_jwtSettings.Value);//value不能低于32bit
+var key = Encoding.UTF8.GetBytes(_jwtSettings.Value);//value不能低于32byte
 ```
 
 SecurityTokenDescriptor是用于描述和生成JSON Web Tokens（JWTs）的类。JWTs是一种安全令牌，它包含有关身份验证和授权的信息，并可以在不同的应用程序之间进行共享。
@@ -204,3 +204,7 @@ public class CurrentUser : ICurrentUser
 一般我们可以通过一个服务扩展类进行扩展以方便后续进一步对服务进行增强或者修改。所以我们在封装类中定义：![123](https://img-blog.csdnimg.cn/fba909c1efd04628868f4432c0c4efbe.png)
 
 现在，就可以在控制器或任何需要访问当前用户ID的位置注入`ICurrentUser`服务，并直接访问其`UserId`属性。
+
+
+
+bearer由header、Payload、Signature等核心组成，声明类型以及服务器生成一个随机字符串或数字作为token并未涉及加密算法的选择使用，使用的HMAC SHA256是一个消息认证码（MAC）算法。
