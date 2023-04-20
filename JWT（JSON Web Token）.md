@@ -207,4 +207,4 @@ public class CurrentUser : ICurrentUser
 
 
 
-bearer由header、Payload、Signature等核心组成，声明类型以及服务器生成一个随机字符串或数字作为token并未涉及加密算法的选择使用，使用的HMAC SHA256是一个消息认证码（MAC）算法。
+bearer由header、Payload、Signature等核心组成，声明类型以及服务器生成一个随机字符串或数字作为token并未涉及加密算法的选择使用，使用的HMAC SHA256是一个消息认证码（MAC）算法。客户端在之后的请求中将这个token带上，以让服务器知道它的身份。
